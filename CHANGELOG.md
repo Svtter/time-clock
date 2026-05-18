@@ -1,0 +1,25 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.1.0] - 2026-05-18
+
+### Added
+
+- Always-on-top transparent floating analog clock window
+- Hour, minute, and second hands with smooth rotation
+- 12 hour numbers and 60 tick marks on the clock face
+- Digital time display below the clock face
+- Date and day of week display
+- Draggable window with position persistence
+- System tray icon with right-click context menu
+- Settings dialog with auto-start on boot option
+- Toggle second hand visibility in settings
+- File-based logging with built-in log viewer
+- Window position saved across sessions
+- Apache 2.0 license
+- Bilingual README (English / Chinese)
+- GitHub Actions CI and release workflows
