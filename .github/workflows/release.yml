@@ -20,7 +20,7 @@ jobs:
           dotnet-version: 9.0.x
 
       - name: Publish
-        run: dotnet publish TimeClock --configuration Release --runtime win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:PublishTrimmed=true -o publish
+        run: dotnet publish TimeClock --configuration Release --runtime win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish
 
       - name: Create archive
         run: Compress-Archive -Path publish/* -DestinationPath TimeClock-win-x64.zip
