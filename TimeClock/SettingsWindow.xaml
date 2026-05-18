@@ -1,0 +1,40 @@
+<Window x:Class="TimeClock.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="设置 - TimeClock"
+        Width="380" Height="240"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        Background="#FFF5F5F5">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <CheckBox Grid.Row="0" x:Name="ChkAutoStart" Content="开机自动启动"
+                  FontSize="14" FontFamily="Microsoft YaHei UI" Margin="0,5"/>
+
+        <CheckBox Grid.Row="1" x:Name="ChkSecondHand" Content="显示秒针"
+                  FontSize="14" FontFamily="Microsoft YaHei UI" Margin="0,10,0,5"/>
+
+        <Button Grid.Row="2" Content="打开日志文件夹..."
+                Click="BtnOpenLog_Click"
+                FontSize="12" FontFamily="Microsoft YaHei UI"
+                Padding="12,4" HorizontalAlignment="Left"
+                Background="White" BorderBrush="#CCCCCC"/>
+
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="确定" Width="80" Height="30" Margin="0,0,10,0"
+                    Click="BtnOK_Click" FontFamily="Microsoft YaHei UI"
+                    Background="#FF4CAF50" Foreground="White" BorderThickness="0"/>
+            <Button Content="取消" Width="80" Height="30"
+                    Click="BtnCancel_Click" FontFamily="Microsoft YaHei UI"/>
+        </StackPanel>
+    </Grid>
+</Window>

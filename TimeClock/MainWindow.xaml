@@ -1,0 +1,62 @@
+<Window x:Class="TimeClock.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="TimeClock"
+        Width="280" Height="340"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Topmost="True"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        Deactivated="Window_Deactivated"
+        MouseLeftButtonDown="Window_MouseLeftButtonDown"
+        LocationChanged="Window_LocationChanged">
+
+    <Grid>
+        <Ellipse x:Name="ClockFace"
+                 Width="258" Height="258"
+                 Margin="11,6,11,0"
+                 VerticalAlignment="Top"
+                 Fill="#E0181830"
+                 Stroke="#35FFFFFF"
+                 StrokeThickness="1.5">
+            <Ellipse.Effect>
+                <DropShadowEffect ShadowDepth="3" BlurRadius="20" Opacity="0.6" Color="Black"/>
+            </Ellipse.Effect>
+        </Ellipse>
+
+        <Canvas x:Name="ClockCanvas"
+                Width="258" Height="258"
+                Margin="11,6,11,0"
+                VerticalAlignment="Top"/>
+
+        <TextBlock x:Name="DigitalTime"
+                   Text="00:00:00"
+                   FontFamily="Consolas"
+                   FontSize="16"
+                   Foreground="#EEFFFFFF"
+                   FontWeight="Medium"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Top"
+                   Margin="0,264,0,0"/>
+
+        <TextBlock x:Name="DateText"
+                   Text=""
+                   FontFamily="Microsoft YaHei UI"
+                   FontSize="11"
+                   Foreground="#99FFFFFF"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Top"
+                   Margin="0,286,0,0"/>
+    </Grid>
+
+    <Window.ContextMenu>
+        <ContextMenu>
+            <MenuItem Header="设置..." Click="Menu_Settings_Click"/>
+            <MenuItem Header="查看日志" Click="Menu_ViewLog_Click"/>
+            <Separator/>
+            <MenuItem Header="退出" Click="Menu_Exit_Click"/>
+        </ContextMenu>
+    </Window.ContextMenu>
+</Window>
