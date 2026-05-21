@@ -25,6 +25,16 @@ jobs:
       - name: Publish (self-contained)
         run: dotnet publish TimeClock --configuration Release --runtime win-x64 --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=none -o publish-sc
 
+      - name: Debug output sizes
+        shell: pwsh
+        run: |
+          Write-Host "=== framework-dependent ==="
+          Get-ChildItem publish-fdd -Recurse | ForEach-Object { Write-Host "$($_.Length) $($_.FullName)" }
+          Write-Host "Total FDD: $((Get-ChildItem publish-fdd -Recurse | Measure-Object -Property Length -Sum).Sum / 1MB) MB"
+          Write-Host "=== self-contained ==="
+          $scTotal = (Get-ChildItem publish-sc -Recurse | Measure-Object -Property Length -Sum).Sum / 1MB
+          Write-Host "Total SC: $scTotal MB"
+
       - name: Create archives
         run: |
           Compress-Archive -Path publish-fdd/* -DestinationPath TimeClock-win-x64-framework-dependent.zip
