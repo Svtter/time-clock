@@ -22,8 +22,8 @@ jobs:
       - name: Publish (framework-dependent)
         run: dotnet publish TimeClock --configuration Release --runtime win-x64 --self-contained false -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -p:DebugType=none -o publish-fdd
 
-      - name: Publish (self-contained trimmed)
-        run: dotnet publish TimeClock --configuration Release --runtime win-x64 --self-contained true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:EnableCompressionInSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=none -o publish-sc
+      - name: Publish (self-contained)
+        run: dotnet publish TimeClock --configuration Release --runtime win-x64 --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=none -o publish-sc
 
       - name: Create archives
         run: |
@@ -50,6 +50,6 @@ jobs:
           body: |
             ## Downloads
             - **framework-dependent** (~5MB): 需要 [.NET 9 运行时](https://dotnet.microsoft.com/download/dotnet/9.0)
-            - **self-contained** (~15-20MB): 无需安装运行时，开箱即用
+            - **self-contained** (~50-60MB): 无需安装运行时，开箱即用
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
