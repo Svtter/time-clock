@@ -20,7 +20,7 @@ jobs:
           dotnet-version: 9.0.x
 
       - name: Publish (framework-dependent)
-        run: dotnet publish TimeClock --configuration Release --runtime win-x64 --self-contained false -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -p:DebugType=none -o publish-fdd
+        run: dotnet publish TimeClock --configuration Release --runtime win-x64 --self-contained false -p:PublishSingleFile=true -p:DebugType=none -p:StripSymbols=true -o publish-fdd
 
       - name: Publish (self-contained)
         run: dotnet publish TimeClock --configuration Release --runtime win-x64 --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=none -o publish-sc
