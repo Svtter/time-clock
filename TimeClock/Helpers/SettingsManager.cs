@@ -1,9 +1,17 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using Microsoft.Win32;
 
 namespace TimeClock.Helpers;
+
+public class AlarmSettings
+{
+    public bool Enabled { get; set; } = true;
+    public string Time { get; set; } = "07:30";
+    public string Label { get; set; } = "";
+}
 
 public class AppSettings
 {
@@ -11,6 +19,7 @@ public class AppSettings
     public bool ShowSecondHand { get; set; } = true;
     public double WindowLeft { get; set; } = double.NaN;
     public double WindowTop { get; set; } = double.NaN;
+    public List<AlarmSettings> Alarms { get; set; } = new();
 }
 
 public static class SettingsManager
@@ -34,12 +43,36 @@ public static class SettingsManager
             {
                 var json = File.ReadAllText(SettingsFilePath);
                 Current = JsonSerializer.Deserialize<AppSettings>(json) ?? new AppSettings();
+                MigrateLegacyAlarm(json);
                 Logger.Info("Settings loaded");
             }
         }
         catch (Exception ex)
         {
             Logger.Error($"Failed to load settings: {ex.Message}");
+        }
+    }
+
+    private static void MigrateLegacyAlarm(string json)
+    {
+        if (Current.Alarms.Count > 0)
+        {
+            return;
+        }
+        try
+        {
+            using var doc = JsonDocument.Parse(json);
+            var root = doc.RootElement;
+            if (root.TryGetProperty("AlarmEnabled", out var enabled) && enabled.GetBoolean() &&
+                root.TryGetProperty("AlarmTime", out var time) && time.ValueKind == JsonValueKind.String)
+            {
+                Current.Alarms.Add(new AlarmSettings { Enabled = true, Time = time.GetString() ?? "07:30" });
+                Logger.Info("Migrated legacy single alarm setting");
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.Error($"Failed to migrate legacy alarm: {ex.Message}");
         }
     }
 
@@ -52,7 +85,7 @@ public static class SettingsManager
             File.WriteAllText(SettingsFilePath, json);
             Current = settings;
             SetAutoStart(settings.AutoStart);
-            Logger.Info($"Settings saved: AutoStart={settings.AutoStart}, ShowSecondHand={settings.ShowSecondHand}");
+            Logger.Info($"Settings saved: AutoStart={settings.AutoStart}, ShowSecondHand={settings.ShowSecondHand}, Alarms={settings.Alarms.Count}");
             SettingsChanged?.Invoke(settings);
         }
         catch (Exception ex)

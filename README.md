@@ -16,6 +16,7 @@ A lightweight, always-on-top desktop analog clock for Windows, built with WPF (.
 - **System tray** — minimizes to tray with right-click context menu
 - **Auto-start** — option to launch on Windows startup (via registry)
 - **Toggle second hand** — show or hide the second hand in settings
+- **Alarms** — settings dialog organized in tabs (General / Alarms); supports multiple alarms (time + optional label); the clock shakes for 15 seconds when an alarm fires, click it to stop early
 - **Logging** — automatic logging of app lifecycle events, stored in `%APPDATA%/TimeClock/Logs/`
 
 ## Requirements
