@@ -13,7 +13,7 @@
         MouseLeftButtonDown="Window_MouseLeftButtonDown"
         LocationChanged="Window_LocationChanged">
 
-    <Grid>
+    <Grid x:Name="ClockRoot">
         <Ellipse x:Name="ClockFace"
                  Width="258" Height="258"
                  Margin="11,6,11,0"

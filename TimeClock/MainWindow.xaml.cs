@@ -18,6 +18,9 @@ public partial class MainWindow : Window
     private readonly RotateTransform _secondRotate;
     private readonly Line _secondHand;
     private readonly System.Windows.Threading.DispatcherTimer _timer;
+    private readonly TranslateTransform _shakeTransform = new();
+    private System.Windows.Media.Animation.Storyboard? _shakeStoryboard;
+    private string _lastAlarmFiredKey = "";
 
     public MainWindow()
     {
@@ -46,6 +49,8 @@ public partial class MainWindow : Window
         };
         _timer.Tick += Timer_Tick;
         _timer.Start();
+
+        ClockRoot.RenderTransform = _shakeTransform;
 
         SettingsManager.SettingsChanged += OnSettingsChanged;
 
@@ -155,15 +160,105 @@ public partial class MainWindow : Window
             : now.ToString("HH:mm");
 
         DateText.Text = now.ToString("yyyy-MM-dd dddd");
+
+        CheckAlarm(now);
+    }
+
+    private void CheckAlarm(DateTime now)
+    {
+        var alarms = SettingsManager.Current.Alarms;
+        if (alarms.Count == 0)
+        {
+            return;
+        }
+
+        var fireKey = $"{now:yyyyMMddHHmm}";
+        foreach (var alarm in alarms)
+        {
+            if (!alarm.Enabled)
+            {
+                continue;
+            }
+
+            if (!TimeSpan.TryParseExact(alarm.Time, @"hh\:mm", null, out var alarmTime) &&
+                !TimeSpan.TryParseExact(alarm.Time, @"h\:mm", null, out alarmTime))
+            {
+                continue;
+            }
+
+            if (now.Hour == alarmTime.Hours && now.Minute == alarmTime.Minutes && _lastAlarmFiredKey != fireKey)
+            {
+                _lastAlarmFiredKey = fireKey;
+                var label = string.IsNullOrWhiteSpace(alarm.Label) ? "" : $" ({alarm.Label.Trim()})";
+                Logger.Info($"Alarm triggered at {alarm.Time}{label}");
+                StartShake();
+                return;
+            }
+        }
+    }
+
+    private void StartShake()
+    {
+        StopShake();
+
+        var shake = new System.Windows.Media.Animation.DoubleAnimationUsingKeyFrames
+        {
+            Duration = TimeSpan.FromSeconds(0.4),
+            RepeatBehavior = new System.Windows.Media.Animation.RepeatBehavior(TimeSpan.FromSeconds(15)),
+        };
+        var offsets = new (double time, double value)[]
+        {
+            (0.00, 0), (0.05, -10), (0.15, 10), (0.25, -8), (0.35, 8), (0.40, 0),
+        };
+        foreach (var (time, value) in offsets)
+        {
+            shake.KeyFrames.Add(new System.Windows.Media.Animation.LinearDoubleKeyFrame(
+                value, System.Windows.Media.Animation.KeyTime.FromTimeSpan(TimeSpan.FromSeconds(time))));
+        }
+
+        System.Windows.Media.Animation.Storyboard.SetTarget(shake, ClockRoot);
+        System.Windows.Media.Animation.Storyboard.SetTargetProperty(shake,
+            new PropertyPath("(UIElement.RenderTransform).(TranslateTransform.X)"));
+
+        _shakeStoryboard = new System.Windows.Media.Animation.Storyboard();
+        _shakeStoryboard.Children.Add(shake);
+        _shakeStoryboard.Completed += (_, _) => StopShake();
+        _shakeStoryboard.Begin();
+    }
+
+    private void StopShake()
+    {
+        if (_shakeStoryboard is null)
+        {
+            return;
+        }
+        _shakeStoryboard.Stop();
+        _shakeStoryboard = null;
+        _shakeTransform.BeginAnimation(TranslateTransform.XProperty, null);
+        _shakeTransform.X = 0;
     }
 
     private void OnSettingsChanged(AppSettings settings)
     {
+        var anyEnabled = false;
+        foreach (var alarm in settings.Alarms)
+        {
+            if (alarm.Enabled)
+            {
+                anyEnabled = true;
+                break;
+            }
+        }
+        if (!anyEnabled)
+        {
+            StopShake();
+        }
         UpdateClock();
     }
 
     private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
+        StopShake();
         DragMove();
     }
 
@@ -214,6 +309,7 @@ public partial class MainWindow : Window
 
     protected override void OnClosed(EventArgs e)
     {
+        StopShake();
         _timer.Stop();
         base.OnClosed(e);
     }
