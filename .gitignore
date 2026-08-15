@@ -4,3 +4,5 @@ obj/
 *.suo
 .vs/
 nul
+dist/
+Installer/publish/

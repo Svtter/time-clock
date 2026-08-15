@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package
+      Name="TimeClock"
+      Manufacturer="Svtter"
+      Version="$(var.MsiVersion)"
+      UpgradeCode="{9B22BA02-E4B7-4DE4-93D3-6370AF76EC73}"
+      Scope="perUser"
+      Compressed="yes"
+      Language="1033">
+
+    <SummaryInformation Description="TimeClock floating desktop clock (MSI installer)" />
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of TimeClock is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <Icon Id="AppIcon.ico" SourceFile="app.ico" />
+    <Property Id="ARPPRODUCTICON" Value="AppIcon.ico" />
+    <Property Id="ARPHELPLINK" Value="https://github.com/Svtter/time-clock" />
+
+    <StandardDirectory Id="LocalAppDataFolder">
+      <Directory Name="Programs">
+        <Directory Id="INSTALLFOLDER" Name="TimeClock" />
+      </Directory>
+    </StandardDirectory>
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="AppMenuDir" Name="TimeClock" />
+    </StandardDirectory>
+
+    <DirectoryRef Id="INSTALLFOLDER">
+      <Component Id="MainExe" Guid="{3F8C1D2A-7B4E-4C95-9D6A-1E0B2C3D4E5F}">
+        <File Id="TimeClockExe" Source="$(var.PublishDir)\TimeClock.exe" KeyPath="yes" />
+      </Component>
+      <Component Id="AppShortcuts" Guid="{C5A5B6D7-2F3E-4A6B-9C1D-0E7F8A9B3C4D}">
+        <Shortcut Id="StartMenuShortcut"
+                  Name="TimeClock"
+                  Description="Floating desktop clock"
+                  Directory="AppMenuDir"
+                  Target="[INSTALLFOLDER]TimeClock.exe"
+                  WorkingDirectory="INSTALLFOLDER"
+                  Icon="AppIcon.ico" />
+        <Shortcut Id="DesktopShortcut"
+                  Name="TimeClock"
+                  Description="Floating desktop clock"
+                  Directory="DesktopFolder"
+                  Target="[INSTALLFOLDER]TimeClock.exe"
+                  WorkingDirectory="INSTALLFOLDER"
+                  Icon="AppIcon.ico" />
+        <RemoveFolder Id="RemoveAppMenuDir" Directory="AppMenuDir" On="uninstall" />
+        <RemoveRegistryValue Root="HKCU" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Run" Name="TimeClock" />
+        <RegistryValue Root="HKCU" Key="Software\Svtter\TimeClock" Name="Installed" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+
+    <Feature Id="Main" Title="TimeClock" Level="1">
+      <ComponentRef Id="MainExe" />
+      <ComponentRef Id="AppShortcuts" />
+    </Feature>
+  </Package>
+</Wix>
