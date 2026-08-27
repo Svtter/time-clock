@@ -6,6 +6,8 @@ A lightweight, always-on-top desktop analog clock for Windows, built with WPF (.
 
 [中文文档](README.zh-CN.md)
 
+![TimeClock screenshot](docs/screenshot.png)
+
 ## Features
 
 - **Always on top** — transparent, borderless floating clock window

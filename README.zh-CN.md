@@ -6,6 +6,8 @@
 
 [English](README.md)
 
+![TimeClock 截图](docs/screenshot.png)
+
 ## 功能特性
 
 - **始终置顶** — 透明无边框悬浮窗口
