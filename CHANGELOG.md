@@ -7,12 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-08-27
+
 ### Added
 
 - Alarm support with shake animation: the clock shakes for 15 seconds when an alarm fires; click the clock to stop it early
 - Settings dialog reorganized into tabs (General / Alarms)
 - Multiple alarms with time (HH:mm) and optional label
 - Automatic migration from the legacy single-alarm setting
+- Adaptive text color: the digital time and date switch between light and dark based on the background behind the clock
+- WiX MSI installer for win-x64 (framework-dependent and self-contained variants)
+- Screenshot in README (English and Chinese)
 
 ## [0.1.0] - 2026-05-18
 
