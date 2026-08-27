@@ -22,6 +22,14 @@ public partial class MainWindow : Window
     private System.Windows.Media.Animation.Storyboard? _shakeStoryboard;
     private string _lastAlarmFiredKey = "";
 
+    private static readonly SolidColorBrush TimeTextOnDarkBg = new(Color.FromArgb(0xEE, 0xFF, 0xFF, 0xFF));
+    private static readonly SolidColorBrush TimeTextOnLightBg = new(Color.FromArgb(0xEE, 0x1A, 0x1A, 0x1A));
+    private static readonly SolidColorBrush DateTextOnDarkBg = new(Color.FromArgb(0x99, 0xFF, 0xFF, 0xFF));
+    private static readonly SolidColorBrush DateTextOnLightBg = new(Color.FromArgb(0x99, 0x30, 0x30, 0x30));
+    private bool _backgroundIsLight;
+    private DateTime _lastContrastSampleUtc = DateTime.MinValue;
+    private const double TextAreaTop = 266;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -54,6 +62,7 @@ public partial class MainWindow : Window
 
         SettingsManager.SettingsChanged += OnSettingsChanged;
 
+        Loaded += (_, _) => UpdateTextContrast(force: true);
         UpdateClock();
         Logger.Info("Clock window created");
     }
@@ -141,6 +150,43 @@ public partial class MainWindow : Window
     private void Timer_Tick(object? sender, EventArgs e)
     {
         UpdateClock();
+        UpdateTextContrast();
+    }
+
+    /// <summary>
+    /// Samples the screen behind the digital time / date area and switches the
+    /// text color between light and dark so it stays readable over any background.
+    /// Throttled because it is also triggered on every drag move.
+    /// </summary>
+    private void UpdateTextContrast(bool force = false)
+    {
+        if (!IsVisible)
+        {
+            return;
+        }
+
+        if (!force && (DateTime.UtcNow - _lastContrastSampleUtc).TotalMilliseconds < 250)
+        {
+            return;
+        }
+        _lastContrastSampleUtc = DateTime.UtcNow;
+
+        // Physical screen rectangle covering the text strip below the clock face.
+        var topLeft = PointToScreen(new Point(0, TextAreaTop));
+        var bottomRight = PointToScreen(new Point(ActualWidth, ActualHeight - 2));
+        var screenRect = new System.Drawing.Rectangle(
+            (int)topLeft.X, (int)topLeft.Y,
+            (int)(bottomRight.X - topLeft.X), (int)(bottomRight.Y - topLeft.Y));
+
+        var isLight = BackgroundContrast.IsLightBackground(screenRect);
+        if (isLight is null || isLight == _backgroundIsLight)
+        {
+            return;
+        }
+
+        _backgroundIsLight = isLight.Value;
+        DigitalTime.Foreground = _backgroundIsLight ? TimeTextOnLightBg : TimeTextOnDarkBg;
+        DateText.Foreground = _backgroundIsLight ? DateTextOnLightBg : DateTextOnDarkBg;
     }
 
     private void UpdateClock()
@@ -264,6 +310,7 @@ public partial class MainWindow : Window
 
     private void Window_LocationChanged(object sender, EventArgs e)
     {
+        UpdateTextContrast();
         if (Left >= 0 && Top >= 0)
         {
             SettingsManager.SaveWindowPosition(Left, Top);

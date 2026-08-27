@@ -13,6 +13,7 @@ A lightweight, always-on-top desktop analog clock for Windows, built with WPF (.
 - **Always on top** — transparent, borderless floating clock window
 - **Analog clock face** — 12 hour numbers, 60 tick marks, hour/minute/second hands
 - **Digital time display** — shown below the clock face
+- **Adaptive text color** — the digital time and date automatically switch between light and dark text based on the background behind the clock, staying readable on any wallpaper
 - **Date display** — current date and day of week
 - **Draggable** — click and drag to reposition; position is remembered
 - **System tray** — minimizes to tray with right-click context menu
