@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Second hand now sweeps smoothly instead of jumping once per second; hands are redrawn every frame so a busy UI thread no longer makes the tick rhythm irregular
+
 ## [0.3.0] - 2026-08-27
 
 ### Added

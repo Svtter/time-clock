@@ -21,6 +21,7 @@ public partial class MainWindow : Window
     private readonly TranslateTransform _shakeTransform = new();
     private System.Windows.Media.Animation.Storyboard? _shakeStoryboard;
     private string _lastAlarmFiredKey = "";
+    private int _lastDrawnSecond = -1;
 
     private static readonly SolidColorBrush TimeTextOnDarkBg = new(Color.FromArgb(0xEE, 0xFF, 0xFF, 0xFF));
     private static readonly SolidColorBrush TimeTextOnLightBg = new(Color.FromArgb(0xEE, 0x1A, 0x1A, 0x1A));
@@ -51,12 +52,16 @@ public partial class MainWindow : Window
         Canvas.SetTop(centerCap, Center - 4);
         ClockCanvas.Children.Add(centerCap);
 
+        // One-second timer only re-samples the text contrast; the hands are
+        // driven per frame so a busy UI thread cannot skew the tick rhythm.
         _timer = new System.Windows.Threading.DispatcherTimer
         {
             Interval = TimeSpan.FromSeconds(1)
         };
-        _timer.Tick += Timer_Tick;
+        _timer.Tick += (_, _) => UpdateTextContrast();
         _timer.Start();
+
+        System.Windows.Media.CompositionTarget.Rendering += CompositionTarget_Rendering;
 
         ClockRoot.RenderTransform = _shakeTransform;
 
@@ -147,12 +152,6 @@ public partial class MainWindow : Window
         return (rotate, line);
     }
 
-    private void Timer_Tick(object? sender, EventArgs e)
-    {
-        UpdateClock();
-        UpdateTextContrast();
-    }
-
     /// <summary>
     /// Samples the screen behind the digital time / date area and switches the
     /// text color between light and dark so it stays readable over any background.
@@ -191,16 +190,37 @@ public partial class MainWindow : Window
 
     private void UpdateClock()
     {
-        var now = DateTime.Now;
-        var secondAngle = now.Second * 6.0;
-        var minuteAngle = now.Minute * 6.0 + now.Second * 0.1;
-        var hourAngle = (now.Hour % 12) * 30.0 + now.Minute * 0.5;
-
-        _hourRotate.Angle = hourAngle;
-        _minuteRotate.Angle = minuteAngle;
-        _secondRotate.Angle = secondAngle;
         _secondHand.Visibility = SettingsManager.Current.ShowSecondHand ? Visibility.Visible : Visibility.Collapsed;
 
+        var now = DateTime.Now;
+        UpdateHands(now);
+        UpdateReadouts(now);
+        _lastDrawnSecond = now.Second;
+    }
+
+    private void CompositionTarget_Rendering(object? sender, EventArgs e)
+    {
+        var now = DateTime.Now;
+        UpdateHands(now);
+
+        if (now.Second != _lastDrawnSecond)
+        {
+            _lastDrawnSecond = now.Second;
+            UpdateReadouts(now);
+        }
+    }
+
+    private void UpdateHands(DateTime now)
+    {
+        var seconds = now.Second + now.Millisecond / 1000.0;
+
+        _secondRotate.Angle = seconds * 6.0;
+        _minuteRotate.Angle = now.Minute * 6.0 + seconds * 0.1;
+        _hourRotate.Angle = (now.Hour % 12) * 30.0 + now.Minute * 0.5 + seconds / 120.0; // hour hand: 0.5°/min = 1/120°/s
+    }
+
+    private void UpdateReadouts(DateTime now)
+    {
         DigitalTime.Text = SettingsManager.Current.ShowSecondHand
             ? now.ToString("HH:mm:ss")
             : now.ToString("HH:mm");
@@ -358,6 +378,8 @@ public partial class MainWindow : Window
     {
         StopShake();
         _timer.Stop();
+        // Rendering is a static event; a lingering subscription keeps the closed window alive.
+        System.Windows.Media.CompositionTarget.Rendering -= CompositionTarget_Rendering;
         base.OnClosed(e);
     }
 }
